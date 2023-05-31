@@ -1,0 +1,6 @@
+*pt
+cache/
+weights/
+.vscode
+trackers/
+__pycache__

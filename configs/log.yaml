@@ -1,0 +1,9 @@
+
+
+
+
+
+
+count of people inside
+gender count of people inside
+(x,y) cordinates of all people in each frame [num_frames, num_people, 2]

@@ -1,0 +1,76 @@
+
+
+cameras:
+  cam0 : /home/ashish/Videos/new_streams/cam0.mp4
+  cam1 : /home/ashish/Videos/new_streams/cam1.avi
+  cam2: /home/ashish/Videos/new_streams/cam2.mp4
+  cam3 : /home/ashish/Videos/new_streams/cam3.mp4
+  cam4 : /home/ashish/Videos/new_streams/cam4.mp4
+  cam5 : /home/ashish/Videos/new_streams/cam5.mp4
+  # cam0 : 'rtsp://admin:Shazabadmin123@172.16.1.2:554'
+  # cam1 : 'rtsp://admin:Shazabadmin123@172.16.1.3:554'
+  # cam2 : 'rtsp://admin:Shazabadmin123@172.16.1.4:554'
+  # cam3 : 'rtsp://admin:Shazabadmin123@172.16.1.5:554'
+  # cam4 : 'rtsp://admin:Shazabadmin123@172.16.1.6:554'
+  cam6 : /home/ashish/Videos/new_streams/cam6.mp4
+  cam7 : /home/ashish/Videos/new_streams/cam7.mp4
+  cam8 : /home/ashish/Videos/new_streams/cam8.mp4
+  cam9 : /home/ashish/Videos/new_streams/cam9.mp4
+  cam10 : /home/ashish/Videos/new_streams/cam10.mp4
+  cam11 : /home/ashish/Videos/new_streams/cam11.mp4
+  cam12 : /home/ashish/Videos/new_streams/cam12.mp4
+  cam13 : /home/ashish/Videos/new_streams/cam13.mp4
+  cam14 : /home/ashish/Videos/new_streams/cam14.mp4
+
+camera_status:
+  cam0 : 'Off'
+  cam1 : 'ON'
+  cam2:  'ON'
+  cam3 : 'off'
+  cam4 : 'Off'
+  cam5 : 'Off'
+  cam6 : 'ON'
+  cam7 : 'ON'
+  cam8 : 'Off'
+  cam9 : 'Off'
+  cam10 : 'Off'
+  cam11 : 'Off'
+  cam12 : 'Off'
+  cam13 : 'Off'
+  cam14 : 'ON'
+
+ROIs:
+  cam0 : [p1, p2, p3, p4]
+  cam1 : [[538, 389], [395, 328], [458, 223], [573, 255]]
+  cam2: [p1, p2, p3, p4]
+  cam3 : [p1, p2, p3, p4]
+  cam4 : [p1, p2, p3, p4]
+  cam5 : [p1, p2, p3, p4]
+  cam6 : [p1, p2, p3, p4]
+  cam7 : [p1, p2, p3, p4]
+  cam8 : [p1, p2, p3, p4]
+  cam9 : [p1, p2, p3, p4]
+  cam10 : [p1, p2, p3, p4]
+  cam11 : [p1, p2, p3, p4]
+  cam12 : [p1, p2, p3, p4]
+  cam13 : [p1, p2, p3, p4]
+  cam14 : [p1, p2, p3, p4]
+
+POIs:
+  cam0 : [x,y]
+  cam1 : [x,y]
+  cam2: [x,y]
+  cam3 : [x,y]
+  cam4 : [x,y]
+  cam5 : [x,y]
+  cam6 : [x,y]
+  cam7 : [x,y]
+  cam8 : [x,y]
+  cam9 : [x,y]
+  cam10 : [x,y]
+  cam11 : [x,y]
+  cam12 : [x,y]
+  cam13 : [x,y]
+  cam14 : [x,y]
+
+

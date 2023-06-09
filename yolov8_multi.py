@@ -72,7 +72,7 @@ while True:
 	for i, frame in enumerate(frames):
 		#. Predict
 		t1= time.time()
-		results = model(frame,verbose=False)
+		results = model(frame,verbose=False, classes=[0])
 		t2 = time.time()
 
 		frame, cs = draw_results(frame, results)

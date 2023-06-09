@@ -17,7 +17,7 @@ class Config_monitor(object):
         thread.daemon = True
         thread.start()
 
-        print('[bold yellow3] Config monitor thread started [/bold yellow3] ', ':smile:', ':thumbs_up:')
+        print('[bold yellow3] Config monitor thread started [/bold yellow3] ')
         time.sleep(1)   
         
     def parse_config(self):
@@ -26,23 +26,25 @@ class Config_monitor(object):
         camera_status = cam_config['camera_status']
         ROIs = cam_config['ROIs']
         POIs = cam_config['POIs']
+        models = cam_config['models']
+        print('models: ', models)
         
         for cam_id, status in camera_status.items():
             if status != 'ON':
-                print(f'[bold red] {cam_id} : {status} [/bold red] ', ':skull:')
+                print(f'[bold red] {cam_id} : {status} [/bold red] ')
                 del cameras[cam_id]
                 del ROIs[cam_id]
                 del POIs[cam_id]
         
         self.updated = False
-        return cameras, ROIs, POIs
+        return cameras, ROIs, POIs, models
 
     def check_for_config_updates(self):
         while True:
             with open(self.cfg_path, 'r') as file:
                 cam_config = yaml.safe_load(file)
             if cam_config != self.cam_config:
-                print('[bold green] Config updated [/bold green] ', ':vampire:')
+                print('[bold green] Config updated [/bold green] ',)
                 self.cam_config = cam_config
                 self.updated = True
             

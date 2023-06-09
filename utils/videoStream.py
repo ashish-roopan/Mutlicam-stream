@@ -7,6 +7,7 @@ from rich import print
 
 class VideoStream(object):
 	def __init__(self, sources=[0]):
+
 		#. Add extra cameras to make it divisible by 4
 		self.streams = [np.ones((480, 704, 3), dtype=np.uint8)*255 for i in range(len(sources) + 4 - len(sources)%4)]
 		self.statuses = {}
@@ -17,6 +18,7 @@ class VideoStream(object):
 		
 		#. Create thread for each camera
 		self.threads = {}
+
 		for i,(cam_id, cap) in enumerate(self.cams.items()):
 			thread = Thread(target=self.update, args=(i, cam_id, cap))
 			thread.daemon = True
@@ -25,12 +27,13 @@ class VideoStream(object):
 		#. Start all threads
 		for cam_id, thread in self.threads.items():
 			thread.start()
-		print('[bold yellow] VideoStream: All threads started [/bold yellow] ', ':smile:', ':thumbs_up:')
+		print('[bold yellow] VideoStream: All threads started [/bold yellow] ')
 		time.sleep(1)   
 		
 	def init_cams(self, sources):
 		cams = {}
 		for cam_id, src in sources.items():
+			print(f'[bold green] Reading from camera: {src} [/bold green] ')
 			cap = cv2.VideoCapture(src)
 			cap.set(cv2.CAP_PROP_BUFFERSIZE, 3)
 			cap.set(cv2.CAP_PROP_POS_FRAMES, 20)

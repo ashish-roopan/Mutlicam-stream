@@ -1,89 +1,95 @@
 from threading import Thread
 import cv2, time
 import numpy as np
-from .helper import letterbox
+from collections import OrderedDict
 from rich import print	
 
+from utils.camera import Camera
 
 class VideoStream(object):
-	def __init__(self, sources=[0]):
-
-		#. Add extra cameras to make it divisible by 4
-		self.streams = [np.ones((480, 704, 3), dtype=np.uint8)*255 for i in range(len(sources) + 4 - len(sources)%4)]
-		self.statuses = {}
-		self.fps = 30
+	def __init__(self, sources, img_h, img_w, ROIs, POIs, models, device, fps=30):
+		''' Create a VideoStream object for each camera in the config file
+			- Create a list of camera objects
+			- Create a thread for each camera object to read frames from the stream
+			- Start the thread
+		'''
 		
-		#. Create a List of VideoCapture objects
-		self.cams = self.init_cams(sources)
-		
-		#. Create thread for each camera
-		self.threads = {}
+		#. Create a list of camera objects 
+		self.cameras = OrderedDict()
+		for i, (cam_id, src) in enumerate(sources.items()):
+			cam_ROIs = ROIs[cam_id]
+			cam_POIs = POIs[cam_id]
+			cam_models = models[cam_id] 
 
-		for i,(cam_id, cap) in enumerate(self.cams.items()):
-			thread = Thread(target=self.update, args=(i, cam_id, cap))
+			#. Create a VideoCapture object associated with the source
+			cap = self.create_capture(src)
+
+			#.create a camera objects
+			camera = Camera(cam_id=cam_id, source=src, cap=cap, fps=fps, img_h=img_h, img_w=img_w, ROIs=cam_ROIs, POIs=cam_POIs, models=cam_models, device=device)
+			
+			#. Create a thread to read frames from the stream
+			thread = Thread(target=self.update, args=(i, camera))
 			thread.daemon = True
-			self.threads[cam_id] = thread
+			camera.thread = thread
+
+			#. Append camera to cameras list			
+			self.cameras[cam_id] = camera
+
+		print('cameras', self.cameras)
 
 		#. Start all threads
-		for cam_id, thread in self.threads.items():
-			thread.start()
-		print('[bold yellow] VideoStream: All threads started [/bold yellow] ')
-		time.sleep(1)   
-		
-	def init_cams(self, sources):
-		cams = {}
-		for cam_id, src in sources.items():
-			print(f'[bold green] Reading from camera: {src} [/bold green] ')
-			cap = cv2.VideoCapture(src)
-			cap.set(cv2.CAP_PROP_BUFFERSIZE, 3)
-			cap.set(cv2.CAP_PROP_POS_FRAMES, 20)
-			cams[cam_id] = cap
-		return cams
-	
-	def update(self, i, cam_id, cap):
-		#. Read the next frame from the stream in a different thread
+		for cam_id, camera in self.cameras.items():
+			camera.thread.start()
+			print('[bold yellow] VideoStream: Thread started for camera {} [/bold yellow]'.format(cam_id))
+		print('[bold green] VideoStream: All threads started [/bold green]\n')
+		time.sleep(1)
+
+	def update(self, i, camera):
+		"""Update the camera object with the latest frame from the stream.
+			- Read the frame from the stream
+			- Resize the frame
+			- Convert the frame to RGB
+			- Draw a rectangle on the frame to display the camera id
+			- Update the camera object
+		"""
+
 		while True:
-			# if cap.isOpened():
-			status, frame = cap.read()
-			if status:
-				frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-				frame = cv2.resize(frame, (704, 480))
-				cv2.rectangle(frame, (0,0), (130,50), (255,255,255), -1)
-				cv2.rectangle(frame, (0,0), (130,50), (0,0,0), 2)
-				cv2.putText(frame, cam_id, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
-			else:
-				frame = np.ones((480, 704, 3), dtype=np.uint8)*140
-				print('[bold red] VideoStream: Camera {} is not available [/bold red]'.format(cam_id))
-			self.streams[i] = frame
-			self.statuses[cam_id] = status
-			time.sleep(1/self.fps)
+			if camera.restart:
+				camera.cap.release()
+				camera.cap = self.create_capture(camera.source)
+				camera.restart = False
+				print('[bold yellow] VideoStream: Thread restarted for camera {} [/bold yellow]'.format(camera.cam_id))
+
+			if camera.cap.isOpened():
+				status, frame = camera.cap.read()
+				if status:
+					frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+					frame = cv2.resize(frame, (camera.img_w, camera.img_h))
+					cv2.rectangle(frame, (0,0), (130,50), (255,255,255), -1)
+					cv2.rectangle(frame, (0,0), (130,50), (0,0,0), 2)
+					cv2.putText(frame, camera.cam_id, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+					if camera.status == 'OFF':
+						camera.status = 'ON'
+						camera.status_change = True
+				else:
+					frame = np.ones((camera.img_h, camera.img_w, 3), dtype=np.uint8)*140
+					cv2.putText(frame, f'{camera.cam_id} stream ended', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+					if camera.status == 'ON':
+						camera.status = 'OFF'
+						camera.status_change = True
+
+				#. Update camera object		
+				camera.frame = frame
+				time.sleep(1/camera.fps)
+
+
+	def create_capture(self, source):
+		"""Create a VideoCapture object associated with the source."""
+		cap = cv2.VideoCapture(source)
+		cap.set(cv2.CAP_PROP_BUFFERSIZE, 3)
+		cap.set(cv2.CAP_PROP_POS_FRAMES, 20)
+		return cap
 	
 	def read(self):
-		return self.streams, self.statuses
+		return self.cameras
 	
-if __name__ == '__main__':
-	video_stream_widget = VideoStream()
-	while True:
-		try:
-			video_stream_widget.show_frame()
-		except AttributeError:
-			pass
-
-
-
-
-
-
-# import cv2
-
-
-# cap = cv2.VideoCapture()
-# cap.open("rtsp://admin:Shazabadmin123@172.16.1.8:554")
-
-# while(True):
-#     ret, frame = cap.read()
-#     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-#     cv2.imshow('frame', frame)
-
-#     if cv2.waitKey(5) & 0xFF == ord('q'):
-#         break

@@ -1,7 +1,9 @@
 import cv2
-from boxmot import DeepOCSORT
+from boxmot import DeepOCSORT, StrongSORT
 from pathlib import Path
 from ultralytics import YOLO
+import argparse
+import time
 
 def draw_results(im, tracker_outputs):
     for x1, y1, x2, y2, track_id, conf, cls in tracker_outputs:
@@ -11,25 +13,31 @@ def draw_results(im, tracker_outputs):
     return im
 
 #.Detector
-model = YOLO('yolov8x.pt')
+model = YOLO('yolov8n.pt')
 
 #.Tracker
 tracker = DeepOCSORT(
-  model_weights=Path('osnet_x0_25_msmt17.pt'),  # which ReID model to use
+  model_weights=Path('mobilenetv2_x1_4_dukemtmcreid.pt'),  # which ReID model to use
   device='cuda:0',  # 'cpu', 'cuda:0', 'cuda:1', ... 'cuda:N'
-  fp16=True,  # wether to run the ReID model with half precision or not
-  det_thresh=0.4
-)
-  
-video_path = '/home/ashish/Videos/server_streams/cam2.mp4'
+  fp16=False,  # wether to run the ReID model with half precision or not
+    )
+
+#print all artributes of tracker
+print(tracker.__dict__.keys())      
+
+
+video_path = '/home/ashish/Videos/server_streams/cam1.avi'
 cap = cv2.VideoCapture(video_path)
 while True:
+    start = time.time()
     ret, im = cap.read()
 
     #.Detector
     dets = model(im,verbose=False, classes=[0])[0].boxes.data.cpu().numpy()
 
     tracker_outputs = tracker.update(dets, im)  
+
+    print('FPS:', 1 / (time.time() - start))
 
     im = draw_results(im, tracker_outputs)
     cv2.imshow('demo', im)

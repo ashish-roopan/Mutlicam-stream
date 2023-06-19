@@ -37,6 +37,7 @@ class Camera():
             fp16=True,  # wether to run the ReID model with half precision or not
                 )
             
+        
 
         self.status_change = False          #Flag to indicate if the status has changed
         self.status = 'ON'

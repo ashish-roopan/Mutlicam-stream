@@ -41,6 +41,8 @@ while True:
 
 	for cam_id, camera in cameras.items():
 		frame = camera.frame
+		source = camera.source
+
 		camera.out_frame = frame.copy()
 		#. Detect people  	
 		if 'det' in camera.models:
@@ -50,11 +52,30 @@ while True:
 		if 'gender' in camera.models:
 			camera.bboxes = hwak.gender_detector(frame,verbose=False, classes=[0,1])[0].boxes.data.cpu().numpy()
 
-		#. Track people					
+		#. Track people		
 		if 'track' in camera.models:
-			camera.tracked_bboxes = camera.tracker.update(camera.bboxes, frame) 
+			# camera.tracked_bboxes = camera.tracker.update(camera.bboxes, frame) 
+			results = hwak.detector.track(source=source, show=False, verbose=False, classes=[0], stream=True)
+			camera.tracked_bboxes = None
+			r = next(iter(results))
+			print('next')
+			for index, box in enumerate(r.boxes):
+				tracker_id = box.id
+				print('tracker_id', tracker_id)
+				print('box', box.data)
+				if tracker_id is not None:
+					print('tracker_id', tracker_id)
+					print('appending')
+					camera.tracked_bboxes = box.data.cpu().numpy()
+			# print('*'*50)
+			# print('result', result)
+			# print('--'*50)
+			# print('tracked_bboxes', result.boxes)
+			# print('result.boxes.is_tracking', result.boxes.is_track)
+			# print()
 
-		
+
+		print('***')
 
 	#. Display
 	canvas = hwak.visualize_results(cameras)

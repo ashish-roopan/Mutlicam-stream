@@ -1,15 +1,15 @@
 
 cameras:
-  cam0 : 'rtsp://admin:Shazabadmin123@172.16.1.2:554'
-  cam1 : 'rtsp://admin:Shazabadmin123@172.16.1.3:554'
-  cam2 : 'rtsp://admin:Shazabadmin123@172.16.1.4:554'
-  cam3 : 'rtsp://admin:Shazabadmin123@172.16.1.5:554'
-  cam4 : 'rtsp://admin:Shazabadmin123@172.16.1.6:554'
-  # cam0 : /home/ashish/Videos/server_streams/cam0.mp4
-  # cam1 : /home/ashish/Videos/server_streams/cam1.avi
-  # cam2: /home/ashish/Videos/server_streams/cam2.mp4
-  # cam3 : /home/ashish/Videos/server_streams/cam3.mp4
-  # cam4 : /home/ashish/Videos/server_streams/cam4.mp4
+  # cam0 : 'rtsp://admin:Shazabadmin123@172.16.1.2:554'
+  # cam1 : 'rtsp://admin:Shazabadmin123@172.16.1.3:554'
+  # cam2 : 'rtsp://admin:Shazabadmin123@172.16.1.4:554'
+  # cam3 : 'rtsp://admin:Shazabadmin123@172.16.1.5:554'
+  # cam4 : 'rtsp://admin:Shazabadmin123@172.16.1.6:554'
+  cam0 : /home/ashish/Videos/server_streams/cam0.mp4
+  cam1 : /home/ashish/Videos/server_streams/cam1.avi
+  cam2: /home/ashish/Videos/server_streams/cam2.mp4
+  cam3 : /home/ashish/Videos/server_streams/cam3.mp4
+  cam4 : /home/ashish/Videos/server_streams/cam4.mp4
   cam5 : /home/ashish/Videos/server_streams/cam5.mp4
   cam6 : /home/ashish/Videos/server_streams/cam6.mp4
   cam7 : /home/ashish/Videos/server_streams/cam7.mp4
@@ -39,18 +39,18 @@ models:
   cam14: ['det', 'track', 'gender', 'weapon']
 
 camera_status:
-  cam0 : 'Off'
+  cam0 : 'off'
   cam1 : 'ON'
-  cam2:  'ON'
-  cam3 : 'ON'
-  cam4 : 'ON'
-  cam5 : 'ON'
-  cam6 : 'ON'
+  cam2:  'Off'
+  cam3 : 'Off'
+  cam4 : 'Off'
+  cam5 : 'Off'
+  cam6 : 'Off'
   cam7 : 'off'
   cam8 : 'off'
   cam9 : 'off'
-  cam10 : 'ON'
-  cam11 : 'ON'
+  cam10 : 'off'
+  cam11 : 'off'
   cam12 : 'off'
   cam13 : 'off'
   cam14 : 'off'

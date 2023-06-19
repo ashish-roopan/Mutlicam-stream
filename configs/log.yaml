@@ -1,9 +1,18 @@
+Each line represents data in one sec
+1.Cnt: Count of people inside the store 
+2.MaleCnt: count of males inside
+3.FemaleCnt: count of females inside
+4.RoiCnt: Count of people in ROIs  {num_frames, num_rois, cnt }
+5.Tcnt: Total count of people visited the shop till that time on a day
+6.TMcnt: Total count of Male visited the shop till that time on a day
+7.TFcnt: Total count of Female visited the shop till that time on a day
+8.(x,y): cordinates of all people in each frame {num_frames, num_people, 2}
+9.Countof people in POIs ????
 
 
+{time, Cnt, MaleCnt, FemaleCnt, Roi_cnt, Tcnt, TMcnt, TFcnt, (x,y)}
+
+{08:30:01, 6, 2, 4, {roi1: 1, roi2: 4, roi3: 1, roi4: 0}}, 30, 22, 8, {cam1:[(2,3), (20, 30)], cam2:[(20,40), (39,77)]}
+{08:30:02, 6, 2, 4, {roi1: 1, roi2: 4, roi3: 1, roi4: 0}}, 30, 22, 8, {cam1:[(2,3), (20, 30)], cam2:[(20,40), (39,77)]}
 
 
-
-
-count of people inside
-gender count of people inside
-(x,y) cordinates of all people in each frame [num_frames, num_people, 2]

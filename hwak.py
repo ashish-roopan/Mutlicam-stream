@@ -119,6 +119,9 @@ class Hwak:
 					frame_centroids.append(centroid)
 					
 			elif 'track' in camera.models:
+				if camera.tracked_bboxes is None:
+					continue
+				print('camera.tracked_bboxes', camera.tracked_bboxes)
 				for bbox in camera.tracked_bboxes:
 					x0,y0,x1,y1,track_id,score,cls_id = bbox
 					

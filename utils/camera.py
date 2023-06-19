@@ -36,7 +36,7 @@ class Camera():
             device='cuda:0',  # 'cpu', 'cuda:0', 'cuda:1', ... 'cuda:N'
             fp16=True,  # wether to run the ReID model with half precision or not
                 )
-            
+        self.tracking = False #. Flag to indicate if the camera cap is used for tracking
         
 
         self.status_change = False          #Flag to indicate if the status has changed

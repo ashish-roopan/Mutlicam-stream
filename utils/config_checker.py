@@ -43,10 +43,12 @@ class Config_monitor(object):
                     del models[cam_id][models[cam_id].index('det')]
                     print(f'[bold #ff0000] {cam_id}: Removed person detector as gender detector is present [/bold #ff0000] ') 
                     
-                #. If model has only track in it add det also
-                if 'track' in models[cam_id] and 'det' not in models[cam_id]:
-                    models[cam_id].append('det')
-                    print(f'[bold #ff0000] {cam_id}: Added person detector as it is required for tracking [/bold #ff0000] ') 
+                #. If model has track in it delete det
+                if 'track' in models[cam_id] and 'det' in models[cam_id]:
+                    del models[cam_id][models[cam_id].index('det')]
+                    print(f'[bold #ff0000] {cam_id}: Removed person detector as tracker is present [/bold #ff0000] ')
+
+
                 
         self.updated = False
         if return_cfg:

@@ -22,9 +22,9 @@ cameras:
   cam14 : /home/ashish/Videos/server_streams/cam14.mp4
 
 models:
-  cam0: ['det', 'track']
-  cam1: ['det', 'track']
-  cam2: ['det', 'track']
+  cam0: ['track']
+  cam1: ['track']
+  cam2: ['track']
   cam3: ['det', 'track']
   cam4: ['det', 'track']
   cam5: ['det', 'gender']
@@ -39,9 +39,9 @@ models:
   cam14: ['det', 'track', 'gender', 'weapon']
 
 camera_status:
-  cam0 : 'off'
+  cam0 : 'OF'
   cam1 : 'ON'
-  cam2:  'Off'
+  cam2:  'ON'
   cam3 : 'Off'
   cam4 : 'Off'
   cam5 : 'Off'

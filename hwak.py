@@ -100,46 +100,26 @@ class Hwak:
 		for i,(cam_id, camera) in enumerate(cameras.items()):
 			camera.out_frame = cv2.cvtColor(camera.out_frame, cv2.COLOR_RGB2BGR)
 			frame_centroids = []
-			if 'track' not in camera.models:
-				for bbox in camera.bboxes:
-					x0,y0,x1,y1,score,cls_id = bbox
-					
-					#. Show gender
-					if self.show_gender and 'gender' in camera.models:
-						gender = 'M' if cls_id == 1 else 'F'
-						color = [255,255,0] if cls_id == 1 else [255,0,255]
-						camera.out_frame = cv2.putText(camera.out_frame, gender, (int(x1), int(y0)), 0, 5e-3 * 200, color, 2)
-					else:
-						color = [0,255,255]
-					
-					#. Draw bboxes
-					if self.draw_bbox:
-						camera.out_frame = cv2.rectangle(camera.out_frame, (int(x0), int(y0)), (int(x1), int(y1)), color, 2)
-					centroid = (int((x0+x1)/2), int(y1))
-					frame_centroids.append(centroid)
-					
-			elif 'track' in camera.models:
-				if camera.tracked_bboxes is None:
-					continue
-				print('camera.tracked_bboxes', camera.tracked_bboxes)
-				for bbox in camera.tracked_bboxes:
-					x0,y0,x1,y1,track_id,score,cls_id = bbox
-					
-					#. Show gender
-					if self.show_gender and 'gender' in camera.models:
-						gender = 'M' if cls_id == 1 else 'F'
-						color = [255,255,0] if cls_id == 1 else [255,0,255]
-						camera.out_frame = cv2.putText(camera.out_frame, gender, (int(x1), int(y0)), 0, 5e-3 * 200, color, 2)
-					else:
-						color = [0,255,255]
-					
-					#. Draw bboxes
-					if self.draw_bbox:
-						camera.out_frame = cv2.rectangle(camera.out_frame, (int(x0), int(y0)), (int(x1), int(y1)), color, 2)
-					centroid = (int((x0+x1)/2), int(y1))
-					frame_centroids.append(centroid)
+			
+			for bbox in camera.bboxes:
+				x0,y0,x1,y1,track_id,score,cls_id = bbox
+				
+				#. Show gender
+				if self.show_gender and 'gender' in camera.models:
+					gender = 'M' if cls_id == 1 else 'F'
+					color = [255,255,0] if cls_id == 1 else [255,0,255]
+					camera.out_frame = cv2.putText(camera.out_frame, gender, (int(x1), int(y0)), 0, 5e-3 * 200, color, 2)
+				else:
+					color = [0,255,255]
+				
+				#. Draw bboxes
+				if self.draw_bbox:
+					camera.out_frame = cv2.rectangle(camera.out_frame, (int(x0), int(y0)), (int(x1), int(y1)), color, 2)
+				centroid = (int((x0+x1)/2), int(y1))
+				frame_centroids.append(centroid)
 
-					#. Show track_id
+				#. Show track_id
+				if track_id != -1:
 					camera.out_frame = cv2.putText(camera.out_frame, str(track_id), (int(x0), int(y0)), 0, 5e-3 * 200, color, 2)
 			
 			#. Append frame centroids to camera centroids

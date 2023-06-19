@@ -35,23 +35,29 @@ while True:
 	
 	for cam_id, camera in cameras.items():
 		camera.print_status()
-		
-		frame = camera.frame
 		source = camera.source
 
-		camera.out_frame = frame.copy()
-
 		#. Track people		
-		if 'track' in camera.models:
+		if 'track' in camera.models and camera.tracking==False:
 			results = hwak.detector.track(source=source, show=False, verbose=False, classes=[0], stream=True)
-			results = next(iter(results))
-			boxes = results.boxes.data
-			# print(boxes, boxes.shape)
+			result = next(iter(results))
+			boxes = result.boxes.data.cpu() 
+			camera.tracking = True
 			print(boxes.shape)
-			if boxes.shape[1] != 7:
-				break
-			print()
 
+		elif 'track' in camera.models and camera.tracking==True:
+			result = next(iter(results))
+			boxes = result.boxes.data.cpu() 
+			print(boxes.shape)
+
+		print(result)
+		frame = result.orig_img
+		#. If no person is detected , add a dummy ID 
+		if boxes.shape[1] == 6:
+			boxes = torch.cat((boxes[:, :4],  torch.ones((boxes.shape[0], 1))*-1, boxes[:, 4:]), dim=1) 	 	
+			print('No person tracked')
+		
+		
 		#. Display
 		for x1, y1, x2, y2, obj_id, cls_pred, cls_conf in boxes:
 			x1 = int(x1)
@@ -60,6 +66,7 @@ while True:
 			y2 = int(y2)
 
 			cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
+			cv2.putText(frame, f'{obj_id}', (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 			cv2.imshow("Output", frame)
 			if cv2.waitKey(1) & 0xFF == ord('q'):
 				sys.exit(0)
@@ -67,3 +74,4 @@ while True:
 
 
 
+	

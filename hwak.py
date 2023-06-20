@@ -17,16 +17,19 @@ class Hwak:
 		self.detector_weights = detector_weights
 		self.img_w = 704
 		self.img_h = 480
-		self.canvas_h = 1000
-		self.canvas_w = 1820 #canvas size is the monitor resolution
-		self.canvas = np.zeros((self.canvas_h, self.canvas_w, 3), dtype=np.uint8)
+		self.monitor_width = 1080
+		self.monitor_height = 1920 #canvas size is the monitor resolution
+		# self.monitor_width = 1820 #canvas size is the monitor resolution
+		# self.monitor_height = 1000
+		self.canvas = np.zeros((self.monitor_height, self.monitor_width, 3), dtype=np.uint8)
+		self.detector_weights = detector_weights
 
 		self.draw_bbox = True
 		self.draw_centroid = True
 		self.show_gender = True
 
 		#. Load detector
-		self.detector = YOLO(detector_weights)
+		# self.detector = YOLO(detector_weights)
 
 		#.Load gender detector
 		self.gender_detector = YOLO(gender_weights)
@@ -42,14 +45,14 @@ class Hwak:
 		if self.config_monitor.updated:
 			print('[bold #55ff55] Config updated [/bold #55ff55] :star: \n')
 			cv2.destroyAllWindows()
-			self.canvas = np.zeros((self.canvas_h, self.canvas_w, 3), dtype=np.uint8)
+			self.canvas = np.zeros((self.monitor_height, self.monitor_width, 3), dtype=np.uint8)
 
 			
 			#. Parse config
 			cam_sources, ROIs, POIs, models = self.config_monitor.parse_config()
 
 			#. Create a VideoStream object for each camera in the config file
-			self.video_streams = VideoStream(sources=cam_sources, img_h=self.img_h, img_w=self.img_w, ROIs=ROIs, POIs=POIs, models=models, device=self.device)  #.{cam_id: camera_object}
+			self.video_streams = VideoStream(sources=cam_sources, img_h=self.img_h, img_w=self.img_w, ROIs=ROIs, POIs=POIs, models=models, detector_weights=self.detector_weights, device=self.device)  #.{cam_id: camera_object}
 
 			self.config_monitor.updated = False
 			print('[bold #55ff55] Config Parsed [/bold #55ff55] :thumbsup: \n')
@@ -89,16 +92,13 @@ class Hwak:
 	def visualize_results(self, cameras):
 		''' Visualize results and find centroid trace'''
 
-		#. Calculate the number of rows and columns for the canvas based on the number of frames
-		num_frames = len(cameras)
-		num_rows = int(np.ceil(np.sqrt(num_frames)))
-		num_cols = int(np.ceil(num_frames / num_rows))
-		tile_width = int(self.canvas_w / num_cols)
-		tile_height = int(self.canvas_h / num_rows)
-
 		#. Iterate over each frame and draw bbox, centroid and place it on the canvas		
 		for i,(cam_id, camera) in enumerate(cameras.items()):
 			camera.out_frame = cv2.cvtColor(camera.out_frame, cv2.COLOR_RGB2BGR)
+			cv2.rectangle(camera.out_frame, (0,0), (130,50), (255,255,255), -1)
+			cv2.rectangle(camera.out_frame, (0,0), (130,50), (0,0,0), 2)
+			cv2.putText(camera.out_frame, camera.cam_id, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+
 			frame_centroids = []
 			
 			for bbox in camera.bboxes:
@@ -120,7 +120,7 @@ class Hwak:
 
 				#. Show track_id
 				if track_id != -1:
-					camera.out_frame = cv2.putText(camera.out_frame, str(track_id), (int(x0), int(y0)), 0, 5e-3 * 200, color, 2)
+					camera.out_frame = cv2.putText(camera.out_frame, str(int(track_id)), (int(x0), int(y0)), 0, 5e-3 * 200, color, 2)
 			
 			#. Append frame centroids to camera centroids
 			camera.centroid_trace.append(frame_centroids)
@@ -132,46 +132,70 @@ class Hwak:
 				for centroids in camera.centroid_trace:
 						for centroid in centroids:
 							camera.out_frame = cv2.circle(camera.out_frame, centroid, 2, (0,0,255), -1)
-
-			#. Add the frame to fit the canvas
-			resized_frame = cv2.resize(camera.out_frame, (tile_width, tile_height))
-			row = i // num_cols
-			col = i % num_cols
-			x = col * tile_width
-			y = row * tile_height
-			self.canvas[y:y+tile_height, x:x+tile_width] = resized_frame
+		
+		#. Concatenate frames into 1 frame
+		self.canvas = self.tile_frames(cameras)
 		return self.canvas
-
+	
+	def find_total_area(self, cameras):
+		total_area = 0
+		for cam_id, camera in cameras.items():
+			h, w = camera.out_frame.shape[:2]
+			area = h*w
+			total_area += area
+		return total_area
+	
+	def find_rectangle_dimensions(self, area, aspect_ratio):
+		# Calculate the width based on the aspect ratio and area
+		width = (area * aspect_ratio) ** 0.5
+		# Calculate the height by dividing the area by the width
+		height = area / width
+		return width, height
+	
 	def tile_frames(self, cameras):
-		# Calculate the number of rows and columns based on the number of frames
-		num_frames = len(cameras)
-		num_rows = int(np.ceil(np.sqrt(num_frames)))
-		num_cols = int(np.ceil(num_frames / num_rows))
+		num_cams = len(cameras)
+		total_area = self.find_total_area(cameras)
+		monitor_ar = self.monitor_width / self.monitor_height
+		total_width, total_height = self.find_rectangle_dimensions(total_area, monitor_ar)
+		
+		if self.monitor_height > self.monitor_width:
+			num_rows = int(np.ceil(total_height / self.img_h))
+			num_cols = int(total_width / self.img_w)
+		else:
+			num_cols = int(np.ceil(total_width / self.img_w))
+			num_rows = int(total_height / self.img_h)
 
-		# Create a blank canvas with the size of the monitor (1920x1080)
-		canvas = np.zeros((self.canvas_h, self.canvas_w, 3), dtype=np.uint8)
+		self.canvas = np.ones((num_rows*self.img_h, num_cols*self.img_w, 3), dtype=np.uint8)
 
-		# Calculate the width and height of each tile
-		tile_width = int(self.canvas_w / num_cols)
-		tile_height = int(self.canvas_h / num_rows)
+		row = 0
+		col = 0
+		for i, (cam_id, camera) in enumerate(cameras.items()):
+			if row >= num_rows:
+				row = 0
+				col += 1
+			if col >= num_cols:
+				break
+				
+			self.canvas[row*self.img_h:(row+1)*self.img_h, col*self.img_w:(col+1)*self.img_w] = camera.out_frame
+			row += 1
 
-		# Iterate over each frame and place it on the canvas
-		for i, camera in enumerate(cameras.items()):
-			# Resize the frame to fit the tile size
-			resized_frame = cv2.resize(camera.out_frame, (tile_width, tile_height))
+		#. Resize canvas to monitor size
+		self.canvas = cv2.resize(self.canvas, (self.monitor_width, self.monitor_height))
 
-			# Calculate the row and column indices for the current frame
-			row = i // num_cols
-			col = i % num_cols
+		print('num_cams: ', num_cams)
+		print('height, width: ', total_height, total_width)
+		print('num_rows, num_cols: ', num_rows, num_cols)
+		print('rows', total_height / self.img_h)
+		print('cols', total_width / self.img_w)
+		return self.canvas
+	
+		# num_cols = total_width / self.img_w
+		# num_rows = total_height / self.img_h
 
-			# Calculate the coordinates to place the frame on the canvas
-			x = col * tile_width
-			y = row * tile_height
 
-			# Place the resized frame on the canvas
-			canvas[y:y+tile_height, x:x+tile_width] = resized_frame
+		
+		exit()
 
-		return canvas
 
 			
 	def track_people(self, frames, ROIs):

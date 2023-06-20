@@ -6,7 +6,7 @@ cameras:
   # cam3 : 'rtsp://admin:Shazabadmin123@172.16.1.5:554'
   # cam4 : 'rtsp://admin:Shazabadmin123@172.16.1.6:554'
   cam0 : /home/ashish/Videos/server_streams/cam0.mp4
-  cam1 : /home/ashish/Videos/server_streams/cam1.avi
+  cam1 : /home/ashish/Videos/server_streams/cam1.mp4
   cam2: /home/ashish/Videos/server_streams/cam2.mp4
   cam3 : /home/ashish/Videos/server_streams/cam3.mp4
   cam4 : /home/ashish/Videos/server_streams/cam4.mp4
@@ -39,21 +39,21 @@ models:
   cam14: ['det', 'track', 'gender', 'weapon']
 
 camera_status:
-  cam0 : 'OF'
+  cam0 : 'ON'
   cam1 : 'ON'
   cam2:  'ON'
-  cam3 : 'Off'
-  cam4 : 'Off'
-  cam5 : 'Off'
-  cam6 : 'Off'
-  cam7 : 'off'
-  cam8 : 'off'
-  cam9 : 'off'
-  cam10 : 'off'
-  cam11 : 'off'
-  cam12 : 'off'
-  cam13 : 'off'
-  cam14 : 'off'
+  cam3 : 'ON'
+  cam4 : 'ON'
+  cam5 : 'OFF'
+  cam6 : 'OFF'
+  cam7 : 'OFF'
+  cam8 : 'OFF'
+  cam9 : 'ON'
+  cam10 : 'ON'
+  cam11 : 'ON'
+  cam12 : 'ON'
+  cam13 : 'ON'
+  cam14 : 'ON'
 
 ROIs:
   cam0 : []

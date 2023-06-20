@@ -7,7 +7,6 @@ import argparse
 import time
 import numpy as np
 from rich import print
-
 from hwak import Hwak
 
 
@@ -34,40 +33,37 @@ while True:
 	cameras = hwak.video_streams.read()  #.{cam_id: camera_object}
 	
 	for cam_id, camera in cameras.items():
+		camera.out_frame = camera.frame
 		camera.print_status()
-		source = camera.source
+
+		print('camera.models', camera.models)
 
 		#. Track people		
-		if 'track' in camera.models and camera.tracking==False:
-			results = hwak.detector.track(source=source, show=False, verbose=False, classes=[0], stream=True)
-			result = next(iter(results))
-			boxes = result.boxes.data.cpu() 
-			camera.tracking = True
-			print(boxes.shape)
+		if 'track' in camera.models:
+			if camera.tracking==False:
+				camera.results = camera.detector.track(source=camera.source, show=False, verbose=False, classes=[0], stream=True)
+				camera.tracking = True
+			
+			#. Read the next frame
+			result = next(iter(camera.results))
+			camera.bboxes = result.boxes.data.cpu() 
+			camera.out_frame = result.orig_img
 
-		elif 'track' in camera.models and camera.tracking==True:
-			result = next(iter(results))
-			boxes = result.boxes.data.cpu() 
-			print(boxes.shape)
-
-		print(result)
-		frame = result.orig_img
 		#. If no person is detected , add a dummy ID 
-		if boxes.shape[1] == 6:
-			boxes = torch.cat((boxes[:, :4],  torch.ones((boxes.shape[0], 1))*-1, boxes[:, 4:]), dim=1) 	 	
+		if camera.bboxes.shape[1] == 6:
+			camera.bboxes = torch.cat((camera.bboxes[:, :4],  torch.ones((camera.bboxes.shape[0], 1))*-1, camera.bboxes[:, 4:]), dim=1) 	 	
 			print('No person tracked')
 		
-		
 		#. Display
-		for x1, y1, x2, y2, obj_id, cls_pred, cls_conf in boxes:
+		for x1, y1, x2, y2, obj_id, cls_pred, cls_conf in camera.bboxes:
 			x1 = int(x1)
 			y1 = int(y1)
 			x2 = int(x2)
 			y2 = int(y2)
 
-			cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
-			cv2.putText(frame, f'{obj_id}', (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-			cv2.imshow("Output", frame)
+			cv2.rectangle(camera.out_frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
+			cv2.putText(camera.out_frame, f'{obj_id}', (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+			cv2.imshow(cam_id, camera.out_frame)
 			if cv2.waitKey(1) & 0xFF == ord('q'):
 				sys.exit(0)
 	

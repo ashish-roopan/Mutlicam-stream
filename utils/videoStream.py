@@ -7,7 +7,7 @@ from rich import print
 from utils.camera import Camera
 
 class VideoStream(object):
-	def __init__(self, sources, img_h, img_w, ROIs, POIs, models, device, fps=30):
+	def __init__(self, sources, img_h, img_w, ROIs, POIs, models, detector_weights, device, fps=30):
 		''' Create a VideoStream object for each camera in the config file
 			- Create a list of camera objects
 			- Create a thread for each camera object to read frames from the stream
@@ -25,7 +25,7 @@ class VideoStream(object):
 			cap = self.create_capture(src)
 
 			#.create a camera objects
-			camera = Camera(cam_id=cam_id, source=src, cap=cap, fps=fps, img_h=img_h, img_w=img_w, ROIs=cam_ROIs, POIs=cam_POIs, models=cam_models, device=device)
+			camera = Camera(cam_id=cam_id, source=src, cap=cap, fps=fps, img_h=img_h, img_w=img_w, ROIs=cam_ROIs, POIs=cam_POIs, models=cam_models, detector_weights=detector_weights, device=device)
 			
 			#. Create a thread to read frames from the stream
 			thread = Thread(target=self.update, args=(i, camera))
@@ -65,9 +65,7 @@ class VideoStream(object):
 				if status:
 					frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 					frame = cv2.resize(frame, (camera.img_w, camera.img_h))
-					cv2.rectangle(frame, (0,0), (130,50), (255,255,255), -1)
-					cv2.rectangle(frame, (0,0), (130,50), (0,0,0), 2)
-					cv2.putText(frame, camera.cam_id, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+					
 					if camera.status == 'OFF':
 						camera.status = 'ON'
 						camera.status_change = True

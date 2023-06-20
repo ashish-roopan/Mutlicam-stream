@@ -43,7 +43,6 @@ while True:
 		source = camera.source
 		frame = camera.frame
 		camera.out_frame = frame.copy()
-		print('camera.models', camera.models)
 
 		#. Detect people  	
 		# if 'det' in camera.models:
@@ -55,47 +54,45 @@ while True:
 		# 	camera.bboxes = hwak.gender_detector(frame,verbose=False, classes=[0,1])[0].boxes.data.cpu()
 		# 	camera.bboxes = torch.cat((camera.bboxes[:, :4],  torch.ones((camera.bboxes.shape[0], 1))*-1, camera.bboxes[:, 4:]), dim=1) 	 	
 
-		# #. Track people		
-		# if 'track' in camera.models:
-		# 	#. create a tracker generator one time
-		# 	if camera.tracking==False:
-		# 		results = hwak.detector.track(source=source, show=False, verbose=False, classes=[0], stream=True)
-		# 		camera.tracking = True
-
-		# 	#. Read from the generator
-		# 	result = next(iter(results))
-		# 	camera.bboxes = result.boxes.data.cpu() 
-		# 	camera.out_frame= result.orig_img.copy()
-
-		# #. If person is not tracked , add a dummy ID 
-		# if camera.bboxes.shape[1] == 6:
-		# 	camera.bboxes = torch.cat((camera.bboxes[:, :4],  torch.ones((camera.bboxes.shape[0], 1))*-1, camera.bboxes[:, 4:]), dim=1) 	 	
-		# print(camera.bboxes)
-
-
 		#. Track people		
-		if 'track' in camera.models and camera.tracking==False:
-			camera.results = hwak.detector.track(source=source, show=False, verbose=False, classes=[0], stream=True)
-			result = next(iter(camera.results))
-			boxes = result.boxes.data.cpu() 
-			camera.bboxes = boxes
-			camera.out_frame = result.orig_img
+		if 'track' in camera.models:
+			if camera.tracking==False:
+				camera.results = camera.detector.track(source=camera.source, show=False, verbose=False, classes=[0], stream=True)
+				camera.tracking = True
 			
-			#. If no person is tracked , add a dummy ID 
-			if camera.bboxes is not None and camera.bboxes.shape[1] == 6:
-				camera.bboxes = torch.cat((camera.bboxes[:, :4],  torch.ones((camera.bboxes.shape[0], 1))*-1, camera.bboxes[:, 4:]), dim=1) 	 	
-			camera.tracking = True
-
-
-		elif 'track' in camera.models and camera.tracking==True:
+			#. Read the next frame
 			result = next(iter(camera.results))
-			boxes = result.boxes.data.cpu() 
-			camera.bboxes = boxes
+			camera.bboxes = result.boxes.data.cpu() 
 			camera.out_frame = result.orig_img
+
+		#. If no person is detected , add a dummy ID 
+		if len(camera.bboxes) and camera.bboxes.shape[1] == 6:
+			camera.bboxes = torch.cat((camera.bboxes[:, :4],  torch.ones((camera.bboxes.shape[0], 1))*-1, camera.bboxes[:, 4:]), dim=1) 	 	
+
+
+		# #. Track people		
+		# if 'track' in camera.models and camera.tracking==False:
+		# 	camera.results = hwak.detector.track(source=source, show=False, verbose=False, classes=[0], stream=True)
+		# 	result = next(iter(camera.results))
+		# 	boxes = result.boxes.data.cpu() 
+		# 	camera.bboxes = boxes
+		# 	camera.out_frame = result.orig_img
+			
+		# 	#. If no person is tracked , add a dummy ID 
+		# 	if camera.bboxes is not None and camera.bboxes.shape[1] == 6:
+		# 		camera.bboxes = torch.cat((camera.bboxes[:, :4],  torch.ones((camera.bboxes.shape[0], 1))*-1, camera.bboxes[:, 4:]), dim=1) 	 	
+		# 	camera.tracking = True
+
+
+		# elif 'track' in camera.models and camera.tracking==True:
+		# 	result = next(iter(camera.results))
+		# 	boxes = result.boxes.data.cpu() 
+		# 	camera.bboxes = boxes
+		# 	camera.out_frame = result.orig_img
 		
-			#. If no person is tracked , add a dummy ID 
-			if camera.bboxes is not None and camera.bboxes.shape[1] == 6:
-				camera.bboxes = torch.cat((camera.bboxes[:, :4],  torch.ones((camera.bboxes.shape[0], 1))*-1, camera.bboxes[:, 4:]), dim=1) 	 	
+		# 	#. If no person is tracked , add a dummy ID 
+		# 	if camera.bboxes is not None and camera.bboxes.shape[1] == 6:
+		# 		camera.bboxes = torch.cat((camera.bboxes[:, :4],  torch.ones((camera.bboxes.shape[0], 1))*-1, camera.bboxes[:, 4:]), dim=1) 	 	
 
 
 
